@@ -22,6 +22,8 @@ class MandrillEndpoint < EndpointBase::Sinatra::Base
 
     template = @payload['email']['template']
     to_addr = @payload['email']['to']
+    addr_arr = to_addr.split(';').map { |addr| { email: addr } } if to_addr.include? ';'
+
     from_addr = @payload['email']['sender_email'] || @payload['email']['from']
     from_name = @payload['email']['sender_name'] || from_addr
     subject = @payload['email']['subject']
@@ -35,7 +37,7 @@ class MandrillEndpoint < EndpointBase::Sinatra::Base
       message: {
         from_email: from_addr,
         from_name: from_name,
-        to: [{ email: to_addr }],
+        to: addr_arr.nil? ? [{ email: to_addr }] : addr_arr,
         bcc_address: bcc_address,
         subject: subject,
         global_merge_vars: global_merge_vars
